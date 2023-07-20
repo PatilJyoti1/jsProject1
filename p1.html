@@ -54,21 +54,30 @@
     }
 
     function editUser(email) {
-      const userData = JSON.parse(localStorage.getItem(email));
-      if (userData) {
-        document.getElementById("username").value = userData.name;
-        document.getElementById("email").value = userData.email;
-        document.getElementById("phonenumber").value = userData.phonenumber;
+     // const userData = JSON.parse(localStorage.getItem(email));
+      //if (userData) {
+       // document.getElementById("username").value = userData.name;
+       // document.getElementById("email").value = userData.email;
+        //document.getElementById("phonenumber").value = userData.phonenumber;
       }
+    
+
+ 
+    function deleteUser(userId) {
+      axios.delete("https://crudcrud.com/api/069a1749038846d1a03c655fac21fb9e/appointmentData/64b8dc33c632b703e830d94a")
+        .then((response) => {
+          const userLi = document.querySelector(`[data-userId="64b8dc33c632b703e830d94a"]`);
+          if (userLi) {
+            userLi.remove();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
     }
 
-    function deleteUser(email) {
-      localStorage.removeItem(email);
-      const userLi = document.querySelector(`[data-email="${email}"]`);
-      if (userLi) {
-        userLi.remove();
-      }
-    }
+    
+
 
     // Load existing users on page load
     window.addEventListener("DOMContentLoaded", () => {
