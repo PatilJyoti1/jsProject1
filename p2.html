@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .todo-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .todo-form {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .todo-form input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    .todo-form button {
+      padding: 8px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 5px;
+    }
+
+    .todo-item .actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .todo-item .actions button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .done-item {
+      padding: 10px;
+      background-color: #d9f6dc;
+      border: 1px solid #71bf82;
+      color: #2c7337;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <div class="todo-form">
+      <input type="text" id="itemName" placeholder="Item Name" required />
+      <input type="text" id="itemDescription" placeholder="Description" required />
+      <button onclick="addItem()">Add Item</button>
+    </div>
+    <ul id="todoList"></ul>
+    
+  </div>
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+  <script>
+    async function fetchTodoItems() {
+      try {
+        const response = await fetch("https://crudcrud.com/api/bb659dbba2e44b3bbe42167bed2cc050/todoData");
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.log(error);
+        return [];
+      }
+    }
+
+    async function saveTodoItems(todoItems) {
+      try {
+        await fetch("https://crudcrud.com/api/bb659dbba2e44b3bbe42167bed2cc050/todoData", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(todoItems),
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    async function addItem() {
+      const itemName = document.getElementById("itemName").value;
+      const itemDescription = document.getElementById("itemDescription").value;
+
+      if (!itemName || !itemDescription) {
+        alert("Please enter both Item Name and Description.");
+        return;
+      }
+
+      const todoItem = {
+        name: itemName,
+        description: itemDescription,
+      };
+
+      const todoList = document.getElementById("todoList");
+      const li = document.createElement("li");
+      li.className = "todo-item";
+      li.innerHTML = `
+        <div>${itemName}: ${itemDescription}</div>
+        <div class="actions">
+          <button onclick="removeItem(this)">&#10005;</button>
+          <button onclick="markDone(this)">&#10003;</button>
+        </div>
+      `;
+      todoList.appendChild(li);
+
+      const todoItems = await fetchTodoItems();
+      todoItems.push(todoItem);
+      saveTodoItems(todoItems);
+
+      document.getElementById("itemName").value = "";
+      document.getElementById("itemDescription").value = "";
+    }
+
+    async function removeItem(button) {
+      const todoItem = button.parentElement.parentElement;
+      todoItem.remove();
+
+      const todoItems = await fetchTodoItems();
+      const updatedTodoItems = todoItems.filter((item) => item.name !== todoItem.textContent);
+      saveTodoItems(updatedTodoItems);
+    }
+
+    async function markDone(button) {
+      const todoItem = button.parentElement.parentElement;
+      const todoText = todoItem.querySelector("div").textContent;
+      const doneItem = document.createElement("div");
+      doneItem.className = "done-item";
+      doneItem.textContent = "Todo DONE: " + todoText;
+      document.getElementById("todoList").appendChild(doneItem);
+      todoItem.remove();
+
+      const todoItems = await fetchTodoItems();
+      const updatedTodoItems = todoItems.filter((item) => item.name !== todoText);
+      saveTodoItems(updatedTodoItems);
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      const todoItems = await fetchTodoItems();
+      for (const item of todoItems) {
+        const todoList = document.getElementById("todoList");
+        const li = document.createElement("li");
+        li.className = "todo-item";
+        li.innerHTML = `
+          <div>${item.name}: ${item.description}</div>
+          <div class="actions">
+            <button onclick="removeItem(this)">&#10005;</button>
+            <button onclick="markDone(this)">&#10003;</button>
+          </div>
+        `;
+        todoList.appendChild(li);
+      }
+    });
+  </script>
+</body>
+</html>
+
+</body>
+</html>
